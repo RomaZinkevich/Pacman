@@ -1,2 +1,2 @@
-Идея проекта: аналог игры Crossy Road
-https://www.youtube.com/watch?v=IQL3cNshU5s
+Идея проекта: аналог игры PacMan
+https://www.youtube.com/watch?v=i_OjztdQ8iw
