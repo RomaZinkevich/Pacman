@@ -1,5 +1,5 @@
 import pygame
-
+import time
 
 walls = pygame.sprite.Group()
 player = pygame.sprite.Group()
@@ -46,26 +46,30 @@ class Pacman(pygame.sprite.Sprite):
             tile_width * x - 50, tile_height * y)
         self.flag_left, self.flag_right, self.flag_up, self.flag_down, \
             = True, True, True, True
+        self.direction = None
+        self.update(self.direction)
 
     def update(self, direction):
+        if direction:
+            self.direction = direction
         x, y = self.rect.x, self.rect.y
-        if direction == "up" and self.flag_up:
-            self.rect.y -= 50
+        if self.direction == "up" and self.flag_up:
+            self.rect.y -= 1
             self.flag_left, self.flag_right, self.flag_up, self.flag_down, \
                 = True, True, True, True
             self.image = self.image_up
-        if direction == "down" and self.flag_down:
-            self.rect.y += 50
+        if self.direction == "down" and self.flag_down:
+            self.rect.y += 1
             self.flag_left, self.flag_right, self.flag_up, self.flag_down, \
                 = True, True, True, True
             self.image = self.image_down
-        if direction == "left" and self.flag_left:
-            self.rect.x -= 50
+        if self.direction == "left" and self.flag_left:
             self.flag_left, self.flag_right, self.flag_up, self.flag_down, \
                 = True, True, True, True
             self.image = self.image_left
-        if direction == "right" and self.flag_right:
-            self.rect.x += 50
+            self.rect.x -= 1
+        if self.direction == "right" and self.flag_right:
+            self.rect.x += 1
             self.flag_left, self.flag_right, self.flag_up, self.flag_down, \
                 = True, True, True, True
             self.image = self.image_right
