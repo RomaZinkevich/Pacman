@@ -47,32 +47,40 @@ class Pacman(pygame.sprite.Sprite):
         self.flag_left, self.flag_right, self.flag_up, self.flag_down, \
             = True, True, True, True
         self.direction = None
+        self.direction2 = None
         self.update(self.direction)
 
     def update(self, direction):
-        if direction:
+        if direction and self.rect.x % 50 == 0 and self.rect.y % 50 == 0:
             self.direction = direction
+        elif direction:
+            self.direction2 = direction
+        if self.direction2 and self.rect.x % 50 == 0 and self.rect.y % 50 == 0:
+            checks = self.check_level(
+                (self.rect.x + 50) // 50, self.rect.y // 50)
+            if self.direction2 == "right" and checks[0]:
+                self.direction = self.direction2
+                self.direction2 = None
+            if self.direction2 == "up" and checks[1]:
+                self.direction = self.direction2
+                self.direction2 = None
+            if self.direction2 == "left" and checks[2]:
+                self.direction = self.direction2
+                self.direction2 = None
+            if self.direction2 == "down" and checks[3]:
+                print(self.rect.x, self.rect.y)
+                print((self.rect.x // 50), self.rect.y // 50)
+                self.direction = self.direction2
+                self.direction2 = None
         x, y = self.rect.x, self.rect.y
-        if self.direction == "up" and self.flag_up:
-            self.rect.y -= 1
-            self.flag_left, self.flag_right, self.flag_up, self.flag_down, \
-                = True, True, True, True
-            self.image = self.image_up
-        if self.direction == "down" and self.flag_down:
-            self.rect.y += 1
-            self.flag_left, self.flag_right, self.flag_up, self.flag_down, \
-                = True, True, True, True
-            self.image = self.image_down
-        if self.direction == "left" and self.flag_left:
-            self.flag_left, self.flag_right, self.flag_up, self.flag_down, \
-                = True, True, True, True
-            self.image = self.image_left
-            self.rect.x -= 1
-        if self.direction == "right" and self.flag_right:
-            self.rect.x += 1
-            self.flag_left, self.flag_right, self.flag_up, self.flag_down, \
-                = True, True, True, True
-            self.image = self.image_right
+        if self.direction == "up":
+            self.up(self.flag_up)
+        if self.direction == "down":
+            self.down(self.flag_down)
+        if self.direction == "left":
+            self.left(self.flag_left)
+        if self.direction == "right":
+            self.right(self.flag_right)
         if pygame.sprite.spritecollideany(self, walls):
             if self.rect.x - x > 0:
                 self.flag_right = False
@@ -88,7 +96,37 @@ class Pacman(pygame.sprite.Sprite):
                 self.rect.x -= 16 * 50
             else:
                 self.rect.x += 16 * 50
-        print(self.rect.x, self.rect.y)
+
+    def check_level(self, x, y):
+        return (level_map[y][x + 1] == ".", level_map[y - 1][x] == ".", level_map[y][x - 1] == ".", level_map[y + 1][x] == ".")
+
+    def right(self, flag):
+        if flag:
+            self.rect.x += 1
+            self.flag_left, self.flag_right, self.flag_up, self.flag_down, \
+                = True, True, True, True
+            self.image = self.image_right
+
+    def left(self, flag):
+        if flag:
+            self.rect.x -= 1
+            self.flag_left, self.flag_right, self.flag_up, self.flag_down, \
+                = True, True, True, True
+            self.image = self.image_left
+
+    def up(self, flag):
+        if flag:
+            self.rect.y -= 1
+            self.flag_left, self.flag_right, self.flag_up, self.flag_down, \
+                = True, True, True, True
+            self.image = self.image_up
+
+    def down(self, flag):
+        if flag:
+            self.rect.y += 1
+            self.flag_left, self.flag_right, self.flag_up, self.flag_down, \
+                = True, True, True, True
+            self.image = self.image_down
 
 
 def move(hero, direction):
