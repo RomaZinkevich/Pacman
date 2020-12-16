@@ -6,7 +6,7 @@ player = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 saves_hor = pygame.sprite.Group()
 
-SCORE = '0'
+SCORE = '-10'
 
 
 class Tile(pygame.sprite.Sprite):
@@ -29,7 +29,7 @@ class Tile(pygame.sprite.Sprite):
             self.image = pygame.transform.scale(
                 pygame.image.load('black.bmp'), (50, 50))
             SCORE = int(SCORE)
-            SCORE += 20
+            SCORE += 10
             SCORE = str(SCORE)
 
 
@@ -85,9 +85,10 @@ class Pacman(pygame.sprite.Sprite):
             self.rect.x, self.rect.y = x, y
         if pygame.sprite.spritecollideany(self, saves_hor):
             if self.rect.x - x > 0:
-                self.rect.x -= 17 * 50
+                self.rect.x -= 16 * 50
             else:
-                self.rect.x += 17 * 50
+                self.rect.x += 16 * 50
+        print(self.rect.x, self.rect.y)
 
 
 def move(hero, direction):
