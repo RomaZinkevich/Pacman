@@ -111,7 +111,7 @@ class Pacman(pygame.sprite.Sprite):
                 self.flag_right = False
             if self.rect.x - x < 0:
                 self.flag_left = False
-            if self.rect.y - y > 0:
+            if self.rect.y - y < 0:
                 self.flag_up = False
             if self.rect.y - y > 0:
                 self.flag_down = False
@@ -123,7 +123,7 @@ class Pacman(pygame.sprite.Sprite):
                 self.rect.x += 16 * 50
 
     def check_level(self, x, y):
-        return (level_map[y][x + 1] == ".", level_map[y - 1][x] == ".", level_map[y][x - 1] == ".", level_map[y + 1][x] == ".")
+        return (level_map[y][x + 1] != "#", level_map[y - 1][x] != "#", level_map[y][x - 1] != "#", level_map[y + 1][x] != "#")
 
     def right(self, flag):
         if flag:
@@ -322,6 +322,7 @@ tile_images = {
 player_image = pygame.image.load('pacman.png')
 player_image_open = pygame.image.load('pacman_open.png')
 pygame.mixer.music.load('pac1.mp3')
+pygame.mixer.music.set_volume(0.5)
 
 level_map = load_level('map1.txt')
 hero = generate_level(level_map)
