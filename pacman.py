@@ -1,5 +1,6 @@
 import pygame
 import time
+import sys
 
 walls = pygame.sprite.Group()
 player = pygame.sprite.Group()
@@ -28,7 +29,6 @@ class Tile(pygame.sprite.Sprite):
         if self.type == 'empty' and pygame.sprite.spritecollideany(self, player)\
                 and self.image == self.images:
             pygame.mixer.music.play()
-            pygame.mixer.music.set_volume(0.1)
             self.image = pygame.transform.scale(
                 pygame.image.load('black.bmp'), (50, 50))
             SCORE = int(SCORE)
@@ -184,7 +184,131 @@ def generate_level(level):
     return new_player
 
 
+def terminate():
+    pygame.quit()
+    sys.exit()
+
+
+def start_screen():
+    intro_text = "PACMAN"
+    fon = pygame.transform.scale(pygame.image.load('fon.jpg'), (width, height))
+    title = pygame.transform.scale(pygame.image.load(
+        'title.png'), (int(650 * 1.2), int(650 * 1.2 / (1280 / 720))))
+    settings = pygame.transform.scale(pygame.image.load(
+        'settings.png'), (113, 100))
+    screen.blit(fon, (0, 0))
+    screen.blit(title, (35, -50))
+    screen.blit(settings, (-10, 705))
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.MOUSEBUTTONDOWN and \
+                    -10 < event.pos[0] < 103 and 805 > event.pos[1] > 705:
+                settings_screen()
+            elif event.type == pygame.KEYDOWN or \
+                    event.type == pygame.MOUSEBUTTONDOWN:
+                start()   # начинаем игру
+        pygame.display.flip()
+        clock.tick(100)
+
+
+def set_draw(volume=0.5):
+    if volume == 0.7999999999999999:
+        volume = 0.8
+    elif volume == 0.19999999999999998:
+        volume = 0.2
+    vol = int(volume * 10)
+    volume2 = set_images[0]
+    volume1 = set_images[1]
+    plus = set_images[3]
+    minus = set_images[4]
+    fon = set_images[2]
+    arrow = set_images[5]
+    screen.blit(fon, (0, 0))
+    text = "Громкость:"
+    string_rendered = font.render(text, 1, pygame.Color('yellow'))
+    screen.blit(string_rendered, (320, 250))
+    screen.blit(minus, (120, 300))
+    screen.blit(plus, (670, 300))
+    screen.blit(arrow, (0, 750))
+    if vol:
+        for i in range(vol):
+            screen.blit(volume2, (i * 50 + 170, 300))
+    else:
+        i = -1
+    for j in range(i + 1, 11 - vol + i):
+        screen.blit(volume1, (j * 50 + 170, 300))
+
+
+def settings_screen():
+    pygame.mixer.music.set_volume(0.5)
+    set_draw(volume=0.5)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.MOUSEBUTTONDOWN and \
+                    170 < event.pos[0] < 670 and 350 > event.pos[1] > 300:
+                x = event.pos[0]
+                x = x - 170
+                volume = ((x // 50) + 1) / 10
+                pygame.mixer.music.set_volume(((x // 50) + 1) / 10)
+                set_draw(volume)
+            elif event.type == pygame.MOUSEBUTTONDOWN and \
+                    120 < event.pos[0] < 170 and 350 > event.pos[1] > 300:
+                volume = get_volume(pygame.mixer.music.get_volume()) - 0.1
+                if volume < 0:
+                    volume = 0
+                set_draw(volume)
+                pygame.mixer.music.set_volume(volume)
+            elif event.type == pygame.MOUSEBUTTONDOWN and \
+                    670 < event.pos[0] < 720 and 350 > event.pos[1] > 300:
+                volume = get_volume(pygame.mixer.music.get_volume()) + 0.1
+                if volume > 1:
+                    volume = 1
+                set_draw(volume)
+                pygame.mixer.music.set_volume(volume)
+            elif event.type == pygame.MOUSEBUTTONDOWN and \
+                    0 <= event.pos[0] <= 50 and 800 >= event.pos[1] >= 750:
+                print(1)
+                start_screen()
+            elif event.type == pygame.KEYDOWN or \
+                    event.type == pygame.MOUSEBUTTONDOWN:
+                start()  # начинаем игру
+        pygame.display.flip()
+        clock.tick(100)
+
+
+def get_volume(volume):
+    volume += 0.0146875
+    if 0 <= volume <= 1:
+        return int(volume * 10) / 10
+    elif volume > 1:
+        return 1
+    else:
+        return 0
+
+
+size = width, height = 850, 800
+set_images = [
+    pygame.transform.scale(pygame.image.load('volume2.png'), (50, 50)),
+    pygame.transform.scale(pygame.image.load('volume1.png'), (50, 50)),
+    pygame.transform.scale(pygame.image.load('fon.jpg'), (width, height)),
+    pygame.transform.scale(pygame.image.load('plus.png'), (50, 50)),
+    pygame.transform.scale(pygame.image.load('minus.png'), (50, 50)),
+    pygame.transform.scale(pygame.image.load('arrow.png'), (50, 50))
+]
+
 pygame.init()
+pygame.font.init()
+font = pygame.font.Font(None, 50)
+
+screen = pygame.display.set_mode(size)
+clock = pygame.time.Clock()
+pygame.display.set_caption("Pacman")
+
 
 tile_width = tile_height = 50
 
@@ -192,42 +316,41 @@ tile_images = {
     'wall': pygame.image.load('wall.bmp'),
     'empty': pygame.image.load('point.bmp'),
     'save_hor': pygame.image.load('point.bmp')
+
+
 }
 player_image = pygame.image.load('pacman.png')
 player_image_open = pygame.image.load('pacman_open.png')
 pygame.mixer.music.load('pac1.mp3')
 
-pygame.font.init()
-size = width, height = 850, 800
-screen = pygame.display.set_mode(size)
-clock = pygame.time.Clock()
-pygame.display.set_caption("Pacman")
-
 level_map = load_level('map1.txt')
 hero = generate_level(level_map)
 
-font = pygame.font.Font(None, 50)
 
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                move(hero, "up")
-            elif event.key == pygame.K_DOWN:
-                move(hero, "down")
-            elif event.key == pygame.K_LEFT:
-                move(hero, "left")
-            elif event.key == pygame.K_RIGHT:
-                move(hero, "right")
-    screen.fill('black')
-    all_sprites.draw(screen)
-    all_sprites.update(None)
-    text = font.render("SCORE: " + SCORE, 1, 'yellow')
-    screen.blit(text, (0, 750))
-    player.draw(screen)
-    player.update(None)
-    pygame.display.flip()
-    clock.tick(100)
+def start():
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    move(hero, "up")
+                elif event.key == pygame.K_DOWN:
+                    move(hero, "down")
+                elif event.key == pygame.K_LEFT:
+                    move(hero, "left")
+                elif event.key == pygame.K_RIGHT:
+                    move(hero, "right")
+        screen.fill('black')
+        all_sprites.draw(screen)
+        all_sprites.update(None)
+        text = font.render("SCORE: " + SCORE, 1, 'yellow')
+        screen.blit(text, (0, 750))
+        player.draw(screen)
+        player.update(None)
+        pygame.display.flip()
+        clock.tick(100)
+
+
+start_screen()
