@@ -2,6 +2,7 @@ import pygame
 import time
 import sys
 
+BEGIN = True
 walls = pygame.sprite.Group()
 player = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
@@ -28,7 +29,8 @@ class Tile(pygame.sprite.Sprite):
         global SCORE
         if self.type == 'empty' and pygame.sprite.spritecollideany(self, player)\
                 and self.image == self.images:
-            pygame.mixer.music.play()
+            if int(SCORE) >= 0:
+                pygame.mixer.music.play()
             self.image = pygame.transform.scale(
                 pygame.image.load('black.bmp'), (50, 50))
             SCORE = int(SCORE)
@@ -40,6 +42,8 @@ class Pacman(pygame.sprite.Sprite):
     def __init__(self, group, x, y):
         super().__init__(group)
         self.add(player)
+        self.ball = pygame.transform.scale(
+            pygame.image.load('ball.png'), (50, 50))
         self.image_right = pygame.transform.scale(player_image, (50, 50))
         self.image_left = pygame.transform.flip(self.image_right, True, False)
         self.image_up = pygame.transform.rotate(self.image_right, 90)
@@ -51,7 +55,7 @@ class Pacman(pygame.sprite.Sprite):
         self.image_up_open = pygame.transform.rotate(self.image_right_open, 90)
         self.image_down_open = pygame.transform.rotate(
             self.image_right_open, 270)
-        self.image = self.image_right
+        self.image = self.ball
         self.rect = self.image.get_rect().move(
             tile_width * x - 50, tile_height * y)
         self.flag_left, self.flag_right, self.flag_up, self.flag_down, \
@@ -92,29 +96,45 @@ class Pacman(pygame.sprite.Sprite):
         x, y = self.rect.x, self.rect.y
         if self.direction == "up":
             self.up(self.flag_up)
-            self.frames[0] = self.image_up
-            self.frames[1] = self.image_up_open
+            if self.flag_up:
+                self.frames[0] = self.image_up
+                self.frames[1] = self.image_up_open
+            else:
+                self.frames[1] = self.image_up
         if self.direction == "down":
             self.down(self.flag_down)
-            self.frames[0] = self.image_down
-            self.frames[1] = self.image_down_open
+            if self.flag_down:
+                self.frames[0] = self.image_down
+                self.frames[1] = self.image_down_open
+            else:
+                self.frames[1] = self.image_down
         if self.direction == "left":
             self.left(self.flag_left)
-            self.frames[0] = self.image_left
-            self.frames[1] = self.image_left_open
+            if self.flag_left:
+                self.frames[0] = self.image_left
+                self.frames[1] = self.image_left_open
+            else:
+                self.frames[1] = self.image_left
         if self.direction == "right":
             self.right(self.flag_right)
-            self.frames[0] = self.image_right
-            self.frames[1] = self.image_right_open
+            if self.flag_right:
+                self.frames[0] = self.image_right
+                self.frames[1] = self.image_right_open
+            else:
+                self.frames[1] = self.image_right
         if pygame.sprite.spritecollideany(self, walls):
             if self.rect.x - x > 0:
                 self.flag_right = False
+                self.frames = [self.image_right, self.image_right]
             if self.rect.x - x < 0:
                 self.flag_left = False
+                self.frames = [self.image_left, self.image_left]
             if self.rect.y - y < 0:
                 self.flag_up = False
+                self.frames = [self.image_up, self.image_up]
             if self.rect.y - y > 0:
                 self.flag_down = False
+                self.frames = [self.image_down, self.image_down]
             self.rect.x, self.rect.y = x, y
         if pygame.sprite.spritecollideany(self, saves_hor):
             if self.rect.x - x > 0:
@@ -316,25 +336,25 @@ tile_images = {
     'wall': pygame.image.load('wall.bmp'),
     'empty': pygame.image.load('point.bmp'),
     'save_hor': pygame.image.load('point.bmp')
-
-
 }
 player_image = pygame.image.load('pacman.png')
 player_image_open = pygame.image.load('pacman_open.png')
-pygame.mixer.music.load('pac1.mp3')
+pygame.mixer.music.load('pac.mp3')
 pygame.mixer.music.set_volume(0.5)
+start_sound = pygame.mixer.Sound('start.mp3')
 
 level_map = load_level('map1.txt')
 hero = generate_level(level_map)
 
 
 def start():
+    global BEGIN, SIGNAL
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            elif event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     move(hero, "up")
                 elif event.key == pygame.K_DOWN:
@@ -352,6 +372,10 @@ def start():
         player.update(None)
         pygame.display.flip()
         clock.tick(100)
+        if BEGIN:
+            start_sound.play()
+            time.sleep(4)
+            BEGIN = False
 
 
 start_screen()
