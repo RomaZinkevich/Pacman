@@ -17,7 +17,7 @@ class Tile(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(tile_images[tile_type], (50, 50))
         self.images = self.image
         self.type = tile_type
-        if tile_type == "wall":
+        if tile_type == "wall" or tile_type == "gate":
             self.add(walls)
         if tile_type == "save_hor":
             self.add(saves_hor)
@@ -143,7 +143,8 @@ class Pacman(pygame.sprite.Sprite):
                 self.rect.x += 16 * 50
 
     def check_level(self, x, y):
-        return (level_map[y][x + 1] != "#", level_map[y - 1][x] != "#", level_map[y][x - 1] != "#", level_map[y + 1][x] != "#")
+        return (level_map[y][x + 1] != "#" and level_map[y][x + 1] != "-", level_map[y - 1][x] != "#" and level_map[y - 1][x] != "-",
+                level_map[y][x - 1] != "#" and level_map[y][x - 1] != "-", level_map[y + 1][x] != "#" and level_map[y + 1][x] != "-")
 
     def right(self, flag):
         if flag:
@@ -200,6 +201,8 @@ def generate_level(level):
                 Tile('wall', x, y)
             elif level[y][x] == '!':
                 Tile('save_hor', x, y)
+            elif level[y][x] == "-":
+                Tile('gate', x, y)
 
     return new_player
 
@@ -335,7 +338,8 @@ tile_width = tile_height = 50
 tile_images = {
     'wall': pygame.image.load('wall.bmp'),
     'empty': pygame.image.load('point.bmp'),
-    'save_hor': pygame.image.load('point.bmp')
+    'save_hor': pygame.image.load('point.bmp'),
+    'gate': pygame.image.load('gate.bmp'),
 }
 player_image = pygame.image.load('pacman.png')
 player_image_open = pygame.image.load('pacman_open.png')
