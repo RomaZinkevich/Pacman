@@ -1,14 +1,14 @@
 import pygame
 import time
 import sys
-
 BEGIN = True
 walls = pygame.sprite.Group()
 player = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 saves_hor = pygame.sprite.Group()
+ghosts = pygame.sprite.Group()
 
-SCORE = '-10'
+SCORE = '0'
 
 
 class Tile(pygame.sprite.Sprite):
@@ -171,6 +171,90 @@ class Pacman(pygame.sprite.Sprite):
                 = True, True, True, True
 
 
+class Blinky(pygame.sprite.Sprite):
+    def __init__(self, group, x, y):
+        super().__init__(group)
+        self.add(ghosts)
+        self.image_right = blinky_right
+        self.image_left = blinky_left
+        self.image_up = blinky_up
+        self.image_down = blinky_down
+        self.image = self.image_left
+        self.rect = self.image.get_rect().move(
+            tile_width * x - 50, tile_height * y)
+        self.flag_left, self.flag_right, self.flag_up, self.flag_down, \
+            = True, True, True, True
+        self.direction = None
+        self.time = 0
+        # self.update(self.direction)
+
+    def update(self, direction):
+        pass
+
+
+class Pinky(pygame.sprite.Sprite):
+    def __init__(self, group, x, y):
+        super().__init__(group)
+        self.add(ghosts)
+        self.image_right = pinky_right
+        self.image_left = pinky_left
+        self.image_up = pinky_up
+        self.image_down = pinky_down
+        self.image = self.image_down
+        self.rect = self.image.get_rect().move(
+            tile_width * x - 50, tile_height * y)
+        self.flag_left, self.flag_right, self.flag_up, self.flag_down, \
+            = True, True, True, True
+        self.direction = None
+        self.time = 0
+        # self.update(self.direction)
+
+    def update(self, direction):
+        pass
+
+
+class Inky(pygame.sprite.Sprite):
+    def __init__(self, group, x, y):
+        super().__init__(group)
+        self.add(ghosts)
+        self.image_right = inky_right
+        self.image_left = inky_left
+        self.image_up = inky_up
+        self.image_down = inky_down
+        self.image = self.image_up
+        self.rect = self.image.get_rect().move(
+            tile_width * x - 50, tile_height * y)
+        self.flag_left, self.flag_right, self.flag_up, self.flag_down, \
+            = True, True, True, True
+        self.direction = None
+        self.time = 0
+        # self.update(self.direction)
+
+    def update(self, direction):
+        pass
+
+
+class Clyde(pygame.sprite.Sprite):
+    def __init__(self, group, x, y):
+        super().__init__(group)
+        self.add(ghosts)
+        self.image_right = clyde_right
+        self.image_left = clyde_left
+        self.image_up = clyde_up
+        self.image_down = clyde_down
+        self.image = self.image_up
+        self.rect = self.image.get_rect().move(
+            tile_width * x - 50, tile_height * y)
+        self.flag_left, self.flag_right, self.flag_up, self.flag_down, \
+            = True, True, True, True
+        self.direction = None
+        self.time = 0
+        # self.update(self.direction)
+
+    def update(self, direction):
+        pass
+
+
 def move(hero, direction):
     hero.update(direction)
 
@@ -193,7 +277,7 @@ def generate_level(level):
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '@':
-                Tile('empty', x, y)
+                Tile('emptyg', x, y)
                 new_player = Pacman(all_sprites, x, y)
             elif level[y][x] == '.':
                 Tile('empty', x, y)
@@ -203,7 +287,18 @@ def generate_level(level):
                 Tile('save_hor', x, y)
             elif level[y][x] == "-":
                 Tile('gate', x, y)
-
+            elif level[y][x] == "B":
+                Tile('empty', x, y)
+                blinky = Blinky(all_sprites, x, y)
+            elif level[y][x] == "P":
+                Tile('emptyg', x, y)
+                pinky = Pinky(all_sprites, x, y)
+            elif level[y][x] == "I":
+                Tile('emptyg', x, y)
+                inky = Inky(all_sprites, x, y)
+            elif level[y][x] == "C":
+                Tile('emptyg', x, y)
+                clyde = Clyde(all_sprites, x, y)
     return new_player
 
 
@@ -267,6 +362,7 @@ def set_draw(volume=0.5):
 
 def settings_screen():
     pygame.mixer.music.set_volume(0.5)
+    start_sound.set_volume(0.5)
     set_draw(volume=0.5)
     while True:
         for event in pygame.event.get():
@@ -278,6 +374,7 @@ def settings_screen():
                 x = x - 170
                 volume = ((x // 50) + 1) / 10
                 pygame.mixer.music.set_volume(((x // 50) + 1) / 10)
+                start_sound.set_volume(((x // 50) + 1) / 10)
                 set_draw(volume)
             elif event.type == pygame.MOUSEBUTTONDOWN and \
                     120 < event.pos[0] < 170 and 350 > event.pos[1] > 300:
@@ -286,6 +383,7 @@ def settings_screen():
                     volume = 0
                 set_draw(volume)
                 pygame.mixer.music.set_volume(volume)
+                start_sound.set_volume(volume)
             elif event.type == pygame.MOUSEBUTTONDOWN and \
                     670 < event.pos[0] < 720 and 350 > event.pos[1] > 300:
                 volume = get_volume(pygame.mixer.music.get_volume()) + 0.1
@@ -293,13 +391,14 @@ def settings_screen():
                     volume = 1
                 set_draw(volume)
                 pygame.mixer.music.set_volume(volume)
+                start_sound.set_volume(volume)
             elif event.type == pygame.MOUSEBUTTONDOWN and \
                     0 <= event.pos[0] <= 50 and 800 >= event.pos[1] >= 750:
                 print(1)
                 start_screen()
             elif event.type == pygame.KEYDOWN or \
                     event.type == pygame.MOUSEBUTTONDOWN:
-                start()  # начинаем игру
+                start_screen()  # начинаем игру
         pygame.display.flip()
         clock.tick(100)
 
@@ -340,12 +439,30 @@ tile_images = {
     'empty': pygame.image.load('point.bmp'),
     'save_hor': pygame.image.load('point.bmp'),
     'gate': pygame.image.load('gate.bmp'),
+    'emptyg': pygame.image.load('black.bmp')
 }
 player_image = pygame.image.load('pacman.png')
 player_image_open = pygame.image.load('pacman_open.png')
+blinky_right = pygame.image.load('blinky_right.png')
+blinky_up = pygame.image.load('blinky_up.png')
+blinky_down = pygame.image.load('blinky_down.png')
+blinky_left = pygame.image.load('blinky_left.png')
+pinky_right = pygame.image.load('pinky_right.png')
+pinky_up = pygame.image.load('pinky_up.png')
+pinky_down = pygame.image.load('pinky_down.png')
+pinky_left = pygame.image.load('pinky_left.png')
+inky_right = pygame.image.load('inky_right.png')
+inky_up = pygame.image.load('inky_up.png')
+inky_down = pygame.image.load('inky_down.png')
+inky_left = pygame.image.load('inky_left.png')
+clyde_right = pygame.image.load('clyde_right.png')
+clyde_up = pygame.image.load('clyde_up.png')
+clyde_down = pygame.image.load('clyde_down.png')
+clyde_left = pygame.image.load('clyde_left.png')
 pygame.mixer.music.load('pac.mp3')
 pygame.mixer.music.set_volume(0.5)
 start_sound = pygame.mixer.Sound('start.mp3')
+start_sound.set_volume(0.5)
 
 level_map = load_level('map1.txt')
 hero = generate_level(level_map)
@@ -374,6 +491,8 @@ def start():
         screen.blit(text, (0, 750))
         player.draw(screen)
         player.update(None)
+        ghosts.draw(screen)
+        ghosts.update(None)
         pygame.display.flip()
         clock.tick(100)
         if BEGIN:
